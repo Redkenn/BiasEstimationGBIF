@@ -7,7 +7,7 @@ library(dplyr)
 library(tidyr)
 
 # Read the shp file with the three types of bias
-Tax_bias <- st_read("Gap_analysis_data/SHP/Outputs/New output/Taxonomic_bias.shp") %>% st_transform(32632)
+Tax_bias <- st_read("Gap_analysis_data/SHP/Outputs/Taxonomic_bias.shp") %>% st_transform(32632)
 
 Temp_bias <- st_read("Gap_analysis_data/SHP/Outputs/Temporal_bias.shp") %>% st_transform(32632)
 
