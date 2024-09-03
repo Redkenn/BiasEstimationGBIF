@@ -8,12 +8,11 @@ library(spdep)
 library(usdm)
 library(marginaleffects)
 
-
 # read input variables
 inputs <- st_read("Gap_analysis_data/SHP/Inputs/g_inputs.shp") %>% st_transform(32632)
 
 # read output variables
-Tax_bias <- st_read("Gap_analysis_data/SHP/Outputs/Taxonomic_bias.shp") %>% st_transform(32632)
+Tax_bias <- st_read("Gap_analysis_data/SHP/Outputs/New output/Taxonomic_bias.shp") %>% st_transform(32632)
 
 Temp_bias <- st_read("Gap_analysis_data/SHP/Outputs/Temporal_bias.shp") %>% st_transform(32632)
 
@@ -36,7 +35,7 @@ Tax_bias <- Tax_bias[Tax_bias$id %in% id_list, ]
 
 df <- data.frame(inputs$id, inputs$rd_dnst, inputs$sdNDVI,inputs$mn_rghn, inputs$W_Wk_SE,
                  inputs$W_PN_SE, inputs$W_Ot_SE, inputs$W_Nt_SE, inputs$Lon, inputs$Lat, 
-                 Tax_bias$J_Taxon, Temp_bias$J_Temp, Spat_bias$NNI)
+                 Tax_bias$Comp, Temp_bias$J_Temp, Spat_bias$NNI)
 
 names(df)[1] <- "id"
 names(df)[2] <- "RD"
@@ -48,7 +47,7 @@ names(df)[7] <- "OthersW"
 names(df)[8] <- "iNaturW"
 names(df)[9] <- "Lon"
 names(df)[10] <- "Lat"
-names(df)[11] <- "Jtaxo"
+names(df)[11] <- "Comp"
 names(df)[12] <- "Jtemp"
 names(df)[13] <- "NNI"
 
@@ -56,29 +55,34 @@ names(df)[13] <- "NNI"
 summary(df)
 
 # Fit a GAM model for the Jtaxo
-gam_Jtaxo1 <- gam(Jtaxo ~ s(RD) + s(sdNDVI)  + s(MR) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
-gam_Jtaxo2 <- gam(Jtaxo ~ s(RD) + s(sdNDVI)  + s(MR) + s(WikiW) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
-gam_Jtaxo3 <- gam(Jtaxo ~ s(RD) + s(sdNDVI)  + s(MR) + s(PlantW) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
-gam_Jtaxo4 <- gam(Jtaxo ~ s(RD) + s(sdNDVI)  + s(MR) + s(OthersW) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
-gam_Jtaxo5 <- gam(Jtaxo ~ s(RD) + s(sdNDVI)  + s(MR) + s(iNaturW) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
+gam_Comp1 <- gam(Comp ~ s(RD) + s(sdNDVI)  + s(MR) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
+gam_Comp2 <- gam(Comp ~ s(RD) + s(sdNDVI)  + s(MR) + s(WikiW) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
+gam_Comp3 <- gam(Comp ~ s(RD) + s(sdNDVI)  + s(MR) + s(PlantW) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
+gam_Comp4 <- gam(Comp ~ s(RD) + s(sdNDVI)  + s(MR) + s(OthersW) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
+gam_Comp5 <- gam(Comp ~ s(RD) + s(sdNDVI)  + s(MR) + s(iNaturW) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
+
+
 
 # model comparison
-AIC(gam_Jtaxo1,gam_Jtaxo2,gam_Jtaxo3,gam_Jtaxo4,gam_Jtaxo5)
+AIC(gam_Comp1,gam_Comp2,gam_Comp3,gam_Comp4,gam_Comp5)
 
 # Summary of the GAM
-summary(gam_Jtaxo1)
+summary(gam_Comp5)
 
 
 # prepare plot for partial effects
-p1 <- plot_predictions(gam_Jtaxo1, condition = 'RD', 
+p1 <- plot_predictions(gam_Comp5, condition = 'RD', 
                  type = 'response', points = 0.5,
-                 rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Taxonomic bias", x = 'RD', y = "Jtaxo") + theme(title = element_text(size = 15), text = element_text(size = 15))
-p2 <- plot_predictions(gam_Jtaxo1, condition = 'sdNDVI', 
+                 rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Taxonomic bias", x = 'RD', y = "Completeness") + theme(title = element_text(size = 15), text = element_text(size = 15))
+p2 <- plot_predictions(gam_Comp5, condition = 'sdNDVI', 
                        type = 'response', points = 0.5,
-                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Taxonomic bias", x = 'sdNDVI', y = "Jtaxo") + theme(title = element_text(size = 15), text = element_text(size = 15))
-p3 <- plot_predictions(gam_Jtaxo1, condition = 'MR', 
+                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Taxonomic bias", x = 'sdNDVI', y = "Completeness") + theme(title = element_text(size = 15), text = element_text(size = 15))
+p3 <- plot_predictions(gam_Comp5, condition = 'MR', 
                        type = 'response', points = 0.5,
-                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Taxonomic bias", x = 'MR', y = "Jtaxo") + theme(title = element_text(size = 15), text = element_text(size = 15))
+                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Taxonomic bias", x = 'MR', y = "Completeness") + theme(title = element_text(size = 15), text = element_text(size = 15))
+p4 <- plot_predictions(gam_Comp5, condition = 'iNaturW', 
+                       type = 'response', points = 0.5,
+                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Taxonomic bias", x = 'iNaturW', y = "Completeness") + theme(title = element_text(size = 15), text = element_text(size = 15))
 
 
 # Fit a GAM model for the Jtemp
@@ -89,6 +93,7 @@ gam_Jtemp4 <-  gam(Jtemp ~ s(RD) + s(sdNDVI) + s(MR) + s(OthersW) + s(Lon, Lat),
 gam_Jtemp5 <-  gam(Jtemp ~ s(RD) + s(sdNDVI) + s(MR) + s(iNaturW) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
 
 
+
 AIC(gam_Jtemp1,gam_Jtemp2,gam_Jtemp3,gam_Jtemp4,gam_Jtemp5)
 
 # Summary of the GAM
@@ -96,15 +101,15 @@ summary(gam_Jtemp3)
 
 
 # prepare plot for partial effects
-p4 <- plot_predictions(gam_Jtemp3, condition = 'RD', 
+p5 <- plot_predictions(gam_Jtemp3, condition = 'RD', 
                        type = 'response', points = 0.5,
-                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Temporal bias", x = 'RD', y = "Jtemp") + theme(title = element_text(size = 15), text = element_text(size = 15))
-p5 <- plot_predictions(gam_Jtemp3, condition = 'MR', 
+                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Temporal bias", x = 'RD', y = "J Index") + theme(title = element_text(size = 15), text = element_text(size = 15))
+p6 <- plot_predictions(gam_Jtemp3, condition = 'MR', 
                        type = 'response', points = 0.5,
-                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Temporal bias", x = 'MR', y = "Jtemp") + theme(title = element_text(size = 15), text = element_text(size = 15))
-p6 <- plot_predictions(gam_Jtemp3, condition = 'PlantW', 
+                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Temporal bias", x = 'MR', y = "J Index") + theme(title = element_text(size = 15), text = element_text(size = 15))
+p7 <- plot_predictions(gam_Jtemp3, condition = 'PlantW', 
                        type = 'response', points = 0.5,
-                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Temporal bias", x = 'PlantW', y = "Jtemp") + theme(title = element_text(size = 15), text = element_text(size = 15))
+                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Temporal bias", x = 'PlantW', y = "J Index") + theme(title = element_text(size = 15), text = element_text(size = 15))
 
 
 # Fit a GAM model for the NNI
@@ -122,10 +127,10 @@ AIC(gam_NNI1,gam_NNI2,gam_NNI3,gam_NNI4,gam_NNI5)
 summary(gam_NNI3)
 
 # prepare plot for partial effects
-p7 <- plot_predictions(gam_NNI3, condition = 'MR', 
+p8 <- plot_predictions(gam_NNI3, condition = 'MR', 
                        type = 'response', points = 0.5,
                        rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Spatial bias", x = 'MR', y = "NNI") + theme(title = element_text(size = 15), text = element_text(size = 15))
-p8 <- plot_predictions(gam_NNI3, condition = 'PlantW', 
+p9 <- plot_predictions(gam_NNI3, condition = 'PlantW', 
                        type = 'response', points = 0.5,
                        rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Spatial bias", x = 'PlantW', y = "NNI") + theme(title = element_text(size = 15), text = element_text(size = 15))
 
@@ -133,6 +138,6 @@ p8 <- plot_predictions(gam_NNI3, condition = 'PlantW',
 
 ptot1 <- p1 + p2 + p3 + plot_annotation(tag_levels = 'A') + plot_layout(nrow = 1, ncol = 3)
 ptot2 <- p4 + p5 + p6 + plot_annotation(tag_levels = list(c('D','E','F'))) + plot_layout(nrow = 1, ncol = 3)
-ptot3 <- p7 + p8 + plot_annotation(tag_levels = list(c('G','H'))) + plot_layout(nrow = 1, ncol = 3)
+ptot3 <- p7 + p8 + p9 + plot_annotation(tag_levels = list(c('G','H','I'))) + plot_layout(nrow = 1, ncol = 3)
 
 
