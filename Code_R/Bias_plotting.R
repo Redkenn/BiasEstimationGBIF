@@ -79,21 +79,26 @@ p1  <-
 
 
 # create trivariate map
-
-
 outputs <- Tax_bias
 outputs$J_Temp <- Temp_bias$J_Temp
 outputs$NNI <- Spat_bias$NNI
 
-
-
-
 tric <- Tricolore(outputs, p1 = 'J_Temp', p2 = 'Comp', p3 = 'NNI',
-                  contrast = 0.5, hue= 1) 
-
+                  contrast = 0.5, hue= 1, breaks = 2) 
 
 outputs$rgb <- tric$rgb 
 
+# change RGB values in viridis RGB 
+outputs$rgb <- ifelse(outputs$rgb == "#CA798B", "#5ec962", outputs$rgb)
+outputs$rgb <- ifelse(outputs$rgb == "#5F5E5E", "#21918c", outputs$rgb)
+outputs$rgb <- ifelse(outputs$rgb == "#6B9E54", "#fde725", outputs$rgb)
+outputs$rgb <- ifelse(outputs$rgb == "#5A96C4", "#3b528b", outputs$rgb)
+
+tric$rgb <- outputs$rgb
+
+tric[["key"]][["data"]][["rgb"]] <-  c("#5ec962", "#21918c", "#3b528b", "#fde725",
+                                       "#5ec962", "#21918c", "#3b528b", "#fde725",
+                                       "#5ec962", "#21918c", "#3b528b", "#fde725")
 
 p2  <- 
   ggplot(outputs)+
