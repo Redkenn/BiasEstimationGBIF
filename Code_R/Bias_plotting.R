@@ -7,11 +7,11 @@ library(dplyr)
 library(tidyr)
 
 # Read the shp file with the three types of bias
-Tax_bias <- st_read("Gap_analysis_data/SHP/Outputs/Taxonomic_bias.shp") %>% st_transform(32632)
+Tax_bias <- st_read("Article_BIAS/Bias_data/SHP/Outputs/Taxonomic_bias.shp") %>% st_transform(32632)
 
-Temp_bias <- st_read("Gap_analysis_data/SHP/Outputs/Temporal_bias.shp") %>% st_transform(32632)
+Temp_bias <- st_read("Article_BIAS/Bias_data/SHP/Outputs/Temporal_bias.shp") %>% st_transform(32632)
 
-Spat_bias <- st_read("Gap_analysis_data/SHP/Outputs/Spatial_bias.shp") %>% st_transform(32632)
+Spat_bias <- st_read("Article_BIAS/Bias_data/SHP/Outputs/Spatial_bias.shp") %>% st_transform(32632)
 
 
 
@@ -57,7 +57,7 @@ p1  <-
   geom_sf(aes(fill = Total_bias))+
   facet_grid(~factor(bias,levels = c('Taxonomic bias (Completeness)','Temporal bias (J Index)','Spatial bias (NNI)')))+
   #scale_fill_distiller("",palette= 'viridis', direction = 1) +
-  scale_fill_viridis("",option= 'viridis', direction = 1) +
+  scale_fill_viridis("",option= 'viridis', direction = -1, limits = c(0, 1), breaks = c(0, 0.25, 0.5, 0.75,1)) +
   labs(title = "Bias map", x="Longitude", y="Latitude", fill = "Total_bias") + theme_light()+
   theme(legend.background = element_blank(),
         panel.grid = element_blank(),
@@ -82,6 +82,8 @@ p1  <-
 outputs <- Tax_bias
 outputs$J_Temp <- Temp_bias$J_Temp
 outputs$NNI <- Spat_bias$NNI
+
+
 
 tric <- Tricolore(outputs, p1 = 'J_Temp', p2 = 'Comp', p3 = 'NNI',
                   contrast = 0.5, hue= 1, breaks = 2) 

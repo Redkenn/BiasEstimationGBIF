@@ -1,17 +1,11 @@
 library(dplyr)
 library(tidyr)
 library(sf)
-library(raster)
-library(rgdal)
-library(spatstat)
-library(purrr)
-library(TPD)
 library(vegan)
-library(rnaturalearth)
+
 
 
 # sardinia border polygons
-
 Sard <- st_read("R/Data/Atlas/limiteAmministrRegionale.shp") %>% st_transform(32632)
 
 
@@ -25,9 +19,7 @@ g <- Sard %>%
 
 
 # GBIF vascular plants with duplicates (from 1950 to 2023)
-
-Plants <- read.csv('Gap_analysis_data/GBIF_data/GBIF_Vascular_Plants_dupl.csv')
-
+Plants <- read.csv('Article_BIAS/Bias_data/GBIF_data/GBIF_Vascular_Plants_dupl.csv')
 Plants <- Plants[,c('species', 'decimalLongitude', 'decimalLatitude', 'year', 'coordinateUncertaintyInMeters' )]
 
 
@@ -36,7 +28,6 @@ names(Plants)[3] <- "y"
 names(Plants)[5] <- "spatialUncertainty"
 
 # transform dataframe into shp data 
-
 p_shp  <- st_as_sf(Plants , coords = c('x', 'y'))
 
 p_shp <- st_set_crs(p_shp, 4326)
@@ -51,22 +42,23 @@ p_g <- p_g  %>%
   filter(!is.na(id))
 
 
-# group p_g by id and year to calculate n° cells of each year per id
-d1 <- p_g %>% dplyr::select(id, year) %>% unique() %>%
+
+# group p_g by id and year to calculate the number of records each year per id
+d1 <- p_g %>% dplyr::select(id, year) %>% 
   group_by(id,year) %>% 
-  summarise(N_cells= n())
+  summarise(N_rec = n())
 
 
-d1 <- data.frame(d1$id, d1$year, d1$N_cells)
+d1 <- data.frame(d1$id, d1$year, d1$N_rec)
 
 names(d1)[1] <- "id"
 names(d1)[2] <- "year"
-names(d1)[3] <- "N_cells"
+names(d1)[3] <- "N_rec"
 
 # create pivot_wider of d1
 d1 %>%  
   unique%>% 
-  pivot_wider(names_from = year,values_from = N_cells) %>% 
+  pivot_wider(names_from = year,values_from = N_rec) %>% 
   dplyr::select(id, order(colnames(.))) %>% 
   as.data.frame() -> d1Wide
 
@@ -74,15 +66,11 @@ d1 %>%
 d1Wide[is.na(d1Wide)] <- 0
 
 
-# calcluate Pielou's evenness for the temporal bias
-
-df1 <- data.frame(S=rowSums(d1Wide[,2:75]),
-                  H=diversity(d1Wide[,2:75]))
-df1$J <- df1$H/log(df1$S)
+# calcluate Pielou's evenness for the temporal bias (74 years of recording)
+df1 <- data.frame(Y = 74,
+                  H = diversity(d1Wide[,2:75]))
+df1$J <- df1$H/log(df1$Y)
 df1$id <- d1Wide$id 
-
-# fill na with mean of the column
-df1$J[is.na(df1$J)] <- mean(df1$J, na.rm = TRUE)
 
 
 # select the id of interest
@@ -97,3 +85,6 @@ g$J_Temp <- df1$J
 
 # save the results
 st_write(g, "Temporal_bias.shp")
+
+
+

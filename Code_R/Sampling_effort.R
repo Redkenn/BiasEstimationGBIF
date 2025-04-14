@@ -66,7 +66,7 @@ p_shp <- p_shp %>% st_transform(32632)
 # join plants shp data with our grid 
 g_plants <- st_join(g, p_shp)
 
-#select rows with NA values in the points column
+# select rows with NA values in the points column
 na_rows <- g_plants[is.na(g_plants$species), ]
 
 id_NA <- na_rows$id

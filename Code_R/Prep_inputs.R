@@ -2,14 +2,11 @@ library(sf)
 library(raster)
 library(MazamaSpatialUtils)
 library(fasterize)
-library(tmap)
 library(dplyr)
-library(tidyverse)
 library(vctrs)
 
 
 # read sardinian border polygons SHP
-
 Sard <- st_read("R/Data/Atlas/limiteAmministrRegionale.shp") %>% st_transform(32632)
 
 
@@ -30,10 +27,7 @@ g$area <- as.numeric(g$area)
 
 
 # read sardinian roads SHP
-
-roads <-  st_read("Gap_analysis_data/SHP/Spatial_determinants/DBGT_10K_22_V02_01_ELEMENTO_STRADALE.shp") %>% st_transform(32632)
-
-
+roads <-  st_read("Article_BIAS/Bias_data/SHP/Spatial_determinants/DBGT_10K_22_V02_01_ELEMENTO_STRADALE.shp") %>% st_transform(32632)
 roads <- roads[,c('SegmentID', 'geometry')]
 
 
@@ -74,14 +68,14 @@ g$road_density[is.na(g$road_density)] <- 0
 # define function to scale values between 0 and 1
 scale_values <- function(x){(x-min(x))/(max(x)-min(x))}
 
-#scale values in 'road_density' column to be between 0 and 1
+# scale values in 'road_density' column to be between 0 and 1
 g$road_density <- scale_values(g$road_density )
 
 
 ### sdNDVI
 
 # read sdNDVI by grid
-sdNDVI <- read_csv("Gap_analysis_data/SHP/Spatial_determinants/sdNDVI.csv", show_col_types = FALSE)
+sdNDVI <- read_csv("Article_BIAS/Bias_data/SHP/Spatial_determinants/sdNDVI.csv", show_col_types = FALSE)
 
 # add sdNDVI to the grid
 g$sdNDVI <- sdNDVI$sdNDVI
@@ -99,21 +93,12 @@ g$sdNDVI <- scale_values(g$sdNDVI)
 # read Sardinian Dem
 Dem <- raster('C:/Users/Rai_8/Documents/R/Data/Clima_Morfologia/TIF/Dem_agg.tif')
 
-# remove comments to observe Dem plot
-#Dem_spat <- as(Dem, "SpatRaster")
 
-#plot(Dem_spat)
-
-
+# calculate topographic roughness
 rough <- terrain(Dem, # raster DEM
                  opt="roughness", # roughness function
                  unit='degrees') # unit degree
 
-# remove comments to observe Dem plot
-
-#plot(rough,
- #    main= "Roughness",
-  #   col=rainbow(50))
 
 # convert raster to point data
 rough_points <- rasterToPoints(rough)
@@ -123,7 +108,6 @@ str(rough_points)
 rough_points <- as.data.frame(rough_points)
 
 # transform dataframe into shp data 
-
 rough_points_shp  <- st_as_sf(rough_points , coords = c('x', 'y'))
 
 rough_points_shp <- st_set_crs(rough_points_shp, 32632)
@@ -145,7 +129,6 @@ group_g_rough$mean_roughness[is.na(group_g_rough$mean_roughness)] <- 0
 group_g_rough$mean_roughness <- scale_values(group_g_rough$mean_roughness)
 
 
-
 # add mean_roughness to grid
 g$mean_roughness<- group_g_rough$mean_roughness
 
@@ -154,8 +137,7 @@ g$mean_roughness<- group_g_rough$mean_roughness
 # sampling effort by dataset source
 
 # Plants
-
-Plants <- read.csv('Gap_analysis_data/GBIF_data/GBIF_Vascular_Plants_dupl.csv')
+Plants <- read.csv('Article_BIAS/Bias_data/GBIF_data/GBIF_Vascular_Plants_dupl.csv')
 
 Plants <- Plants[,c('datasetKey','species', 'decimalLongitude', 'decimalLatitude', 'year', 'coordinateUncertaintyInMeters' )]
 
@@ -185,18 +167,15 @@ Plants$iNaturalist <- ifelse(Plants$datasetKey == 'iNaturalist', 1, 0)
 
 
 # transform dataframe into shp data 
-
 p_shp  <- st_as_sf(Plants , coords = c('x', 'y'))
-
 p_shp <- st_set_crs(p_shp, 4326)
-
 p_shp <- p_shp %>% st_transform(32632)
 
 
 # join plants shp data with our grid 
 g_plants <- st_join(g, p_shp)
 
-#select rows with NA values in the points column
+# select rows with NA values in the points column
 na_rows <- g_plants[is.na(g_plants$species), ]
 
 id_NA <- na_rows$id
@@ -217,7 +196,6 @@ group_g_plants$Total_SE <- ifelse(group_g_plants$id %in% id_NA, group_g_plants$T
 group_g_plants[is.na(group_g_plants)] <- 0
 
 # calculate proportion (weight) of each dataset source
-
 group_g_plants$W_Wiki_SE <- group_g_plants$Wiki_SE / group_g_plants$Total_SE
 group_g_plants$W_PlantN_SE <- group_g_plants$PlantN_SE / group_g_plants$Total_SE
 group_g_plants$W_Others_SE <- group_g_plants$Others_SE / group_g_plants$Total_SE
@@ -226,6 +204,7 @@ group_g_plants$W_iNatur_SE <- group_g_plants$iNatur_SE / group_g_plants$Total_SE
 # fill na with 0
 group_g_plants[is.na(group_g_plants)] <- 0
 
+g$Total_SE <- group_g_plants$Total_SE
 g$W_Wiki_SE <- group_g_plants$W_Wiki_SE
 g$W_PlantN_SE <- group_g_plants$W_PlantN_SE
 g$W_Others_SE <- group_g_plants$W_Others_SE
@@ -239,6 +218,12 @@ centroid <- st_centroid(g)
 # extract Latitude and Longitude 
 df <- centroid %>% extract(geometry, c('lat', 'lon'), '\\((.*), (.*)\\)', convert = TRUE) 
 
+# extract Latitude and Longitude
+df <- centroid %>% 
+  mutate(lat = st_coordinates(.)[,2], 
+         lon = st_coordinates(.)[,1])
+
+
 # add Latitude and Longitude to grid
 g$Lat <- df$lat
 g$Lon <- df$lon
@@ -246,10 +231,7 @@ g$Lon <- df$lon
 
 
 # select variables of interest
-
-
-g <- g[,c('id', 'road_density', 'sdNDVI', 'mean_roughness', 'W_Wiki_SE', 'W_PlantN_SE', 'W_Others_SE', 'W_iNatur_SE', 'Lon', 'Lat')]
-
+g <- g[,c('id', 'road_density', 'sdNDVI', 'mean_roughness', 'Total_SE', 'W_Wiki_SE', 'W_PlantN_SE', 'W_Others_SE', 'W_iNatur_SE', 'Lon', 'Lat')]
 
 
 # save the results
@@ -257,6 +239,5 @@ st_write(g, "g_inputs.shp")
 
 
 
-funchir::stale_package_check('Prep_inputs.R')
 
 

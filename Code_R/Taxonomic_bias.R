@@ -60,7 +60,6 @@ d1 <- p_g %>% dplyr::select(id, species) %>% unique() %>%
   summarise(ni = n())
 
 
-#d1 <- read.csv('Gap_analysis_data/dd_ni.csv')
 
 d1 <- data.frame(d1$id, d1$species, d1$ni)
 
@@ -69,15 +68,12 @@ names(d1)[2] <- "species"
 names(d1)[3] <- "ni"
 
 # split the d1 dataset by grouping of id using "f" argument
-
 split_d1 <- split(d1$ni, f = d1$id)
 
 # use iNEXT function with 5 knots
-
 result <- iNEXT(split_d1, q=0, datatype="abundance", knots = 5)
 
 # extract the sample coverage estimate for the reference sample
-
 SC <- result[["DataInfo"]]$SC
 
 # update g with id_list

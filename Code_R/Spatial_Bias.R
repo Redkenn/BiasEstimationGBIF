@@ -11,7 +11,6 @@ library(rnaturalearth)
 
 
 # sardinia border polygons
-
 Sard <- st_read("R/Data/Atlas/limiteAmministrRegionale.shp") %>% st_transform(32632)
 
 
@@ -25,10 +24,7 @@ g <- Sard %>%
 
 
 # GBIF vascular plants Without duplicates (from 1950 to 2023)
-
 Plants <- read.csv('Gap_analysis_data/GBIF_data/GBIF_Vascular_Plants.csv')
-
-
 Plants <- Plants[,c('species', 'decimalLongitude', 'decimalLatitude', 'year', 'coordinateUncertaintyInMeters' )]
 
 
@@ -37,7 +33,6 @@ names(Plants)[3] <- "y"
 names(Plants)[5] <- "spatialUncertainty"
 
 # transform dataframe into shp data 
-
 p_shp  <- st_as_sf(Plants , coords = c('x', 'y'))
 
 p_shp <- st_set_crs(p_shp, 4326)
@@ -56,16 +51,16 @@ p_g <- p_g  %>%
 # select the id of interest
 id_list <- sort(unique(p_g$id))
 
-#sort p_g in ascending order of id
+# sort p_g in ascending order of id
 p_g_ord  <- p_g[order(p_g$id),]
 
-#Select columns id and geometry (the latter is selected automatically)
+# Select columns id and geometry (the latter is selected automatically)
 p_g_ord <- p_g_ord[,c('id')]
 
-#extract coordinates from p_g_ord
+# extract coordinates from p_g_ord
 coord <- as.data.frame(st_coordinates(p_g_ord))
 
-#create dataframe with id and coordinates of points
+# create dataframe with id and coordinates of points
 p_g_coord <- data.frame(id = p_g_ord$id,coord)
 
 # split the p_g_coord by grouping of id using "f" argument
