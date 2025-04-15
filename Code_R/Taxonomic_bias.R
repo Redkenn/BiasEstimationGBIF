@@ -7,14 +7,11 @@ library(ggplot2)
 library(viridis)
 
 # sardinia border polygons
-
 Sard <- st_read("R/Data/Atlas/limiteAmministrRegionale.shp") %>% st_transform(32632)
 
 
 # GBIF vascular plants Without duplicates (from 1950 to 2023)
-
 Plants <- read.csv('Gap_analysis_data/GBIF_data/GBIF_Vascular_Plants.csv')
-
 Plants <- Plants[,c('species', 'decimalLongitude', 'decimalLatitude', 'year', 'coordinateUncertaintyInMeters' )]
 
 
@@ -23,7 +20,6 @@ names(Plants)[3] <- "y"
 names(Plants)[5] <- "spatialUncertainty"
 
 # transform dataframe into shp data 
-
 p_shp  <- st_as_sf(Plants , coords = c('x', 'y'))
 
 p_shp <- st_set_crs(p_shp, 4326)
