@@ -2,9 +2,7 @@ library(sf)
 library(dplyr)
 
 
-
 # GBIF vascular plants 
-
 Plants <- read.csv("Gap_analysis_data/GBIF_data/GBIF_full.csv", sep='\t')
 
 
