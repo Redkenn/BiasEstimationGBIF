@@ -52,6 +52,8 @@ scale_values <- function(x){(x-min(x))/(max(x)-min(x))}
 
 # scale Total_SE variable
 df$TotalSE <- scale_values(df$TotalSE)
+# scale sdNDVI variable
+df$sdNDVI <- scale_values(df$sdNDVI)
 
 summary(df)
 
@@ -75,18 +77,18 @@ summary(gam_Comp2)
 # prepare plot for partial effects
 p1 <- plot_predictions(gam_Comp2, condition = 'RD', 
                  type = 'response', points = 0.5,
-                 rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Taxonomic bias", x = 'RD', y = "Completeness") + theme(title = element_text(size = 15), text = element_text(size = 15))
+                 rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "", x = 'RD', y = "Completeness") + theme(title = element_text(size = 15), text = element_text(size = 15)) + ylim(0, 1)
 p2 <- plot_predictions(gam_Comp2, condition = 'sdNDVI', 
                        type = 'response', points = 0.5,
-                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Taxonomic bias", x = 'sdNDVI', y = "Completeness") + theme(title = element_text(size = 15), text = element_text(size = 15))
+                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "", x = 'sdNDVI', y = "Completeness") + theme(title = element_text(size = 15), text = element_text(size = 15)) + ylim(0, 1) 
 p3 <- plot_predictions(gam_Comp2, condition = 'TotalSE', 
                        type = 'response', points = 0.5,
-                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Taxonomic bias", x = 'TotalSE', y = "Completeness") + theme(title = element_text(size = 15), text = element_text(size = 15))
+                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "", x = 'TotalSE', y = "Completeness") + theme(title = element_text(size = 15), text = element_text(size = 15)) + ylim(0, 1) 
 
 
 # Fit a GAM model for the Jtemp
 gam_Jtemp1 <-  gam(Jtemp ~ s(RD) + s(sdNDVI) + s(MR) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
-gam_Jtemp2 <-  gam(Jtemp ~ s(RD) + s(sdNDVI) + s(MR) + s(Total_SE) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
+gam_Jtemp2 <-  gam(Jtemp ~ s(RD) + s(sdNDVI) + s(MR) + s(TotalSE) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
 gam_Jtemp3 <-  gam(Jtemp ~ s(RD) + s(sdNDVI) + s(MR) + s(WikiW) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
 gam_Jtemp4 <-  gam(Jtemp ~ s(RD) + s(sdNDVI) + s(MR) + s(PlantW) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
 gam_Jtemp5 <-  gam(Jtemp ~ s(RD) + s(sdNDVI) + s(MR) + s(OthersW) + s(Lon, Lat), data = df, method = 'REML', select = TRUE)
@@ -102,21 +104,22 @@ summary(gam_Jtemp3)
 # prepare plot for partial effects
 p4 <- plot_predictions(gam_Jtemp3, condition = 'RD', 
                        type = 'response', points = 0.5,
-                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Temporal bias", x = 'RD', y = "J Index") + theme(title = element_text(size = 15), text = element_text(size = 15))
+                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "", x = 'RD', y = "J Index") + theme(title = element_text(size = 15), text = element_text(size = 15))  + ylim(0, 1)
+      
 p5 <- plot_predictions(gam_Jtemp3, condition = 'sdNDVI', 
                        type = 'response', points = 0.5,
-                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Temporal bias", x = 'sdNDVI', y = "J Index") + theme(title = element_text(size = 15), text = element_text(size = 15))
+                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "", x = 'sdNDVI', y = "J Index") + theme(title = element_text(size = 15), text = element_text(size = 15)) + ylim(0, 1) 
 p6 <- plot_predictions(gam_Jtemp3, condition = 'MR', 
                        type = 'response', points = 0.5,
-                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Temporal bias", x = 'MR', y = "J Index") + theme(title = element_text(size = 15), text = element_text(size = 15))
+                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "", x = 'MR', y = "J Index") + theme(title = element_text(size = 15), text = element_text(size = 15)) + ylim(0, 1) 
 p7 <- plot_predictions(gam_Jtemp3, condition = 'WikiW', 
                        type = 'response', points = 0.5,
-                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Temporal bias", x = 'WikiW', y = "J Index") + theme(title = element_text(size = 15), text = element_text(size = 15))
+                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "", x = 'WikiW', y = "J Index") + theme(title = element_text(size = 15), text = element_text(size = 15)) + ylim(0, 1) 
 
 
 # Fit a GAM model for the NNI
 gam_NNI1 <- gam(NNI~ s(RD) + s(sdNDVI)  + s(MR) + s(Lon,Lat), data = df, method = 'REML', select = TRUE)
-gam_NNI2 <- gam(NNI~ s(RD) + s(sdNDVI)  + s(MR) + s(Total_SE) + s(Lon,Lat), data = df, method = 'REML', select = TRUE)
+gam_NNI2 <- gam(NNI~ s(RD) + s(sdNDVI)  + s(MR) + s(TotalSE) + s(Lon,Lat), data = df, method = 'REML', select = TRUE)
 gam_NNI3 <- gam(NNI~ s(RD) + s(sdNDVI)  + s(MR) + s(WikiW) + s(Lon,Lat), data = df, method = 'REML', select = TRUE)
 gam_NNI4 <- gam(NNI~ s(RD) + s(sdNDVI)  + s(MR) + s(PlantW) + s(Lon,Lat), data = df, method = 'REML', select = TRUE)
 gam_NNI5 <- gam(NNI~ s(RD) + s(sdNDVI)  + s(MR) + s(OthersW) + s(Lon,Lat), data = df, method = 'REML', select = TRUE)
@@ -132,10 +135,12 @@ summary(gam_NNI4)
 # prepare plot for partial effects
 p8 <- plot_predictions(gam_NNI4, condition = 'MR', 
                        type = 'response', points = 0.5,
-                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Spatial bias", x = 'MR', y = "NNI") + theme(title = element_text(size = 15), text = element_text(size = 15))
+                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "", x = 'MR', y = "NNI") + theme(title = element_text(size = 15), text = element_text(size = 15))  + ylim(0, 1)
 p9 <- plot_predictions(gam_NNI4, condition = 'PlantW', 
                        type = 'response', points = 0.5,
-                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "Spatial bias", x = 'PlantW', y = "NNI") + theme(title = element_text(size = 15), text = element_text(size = 15))
+                       rug = TRUE)  + theme_minimal() + theme(element_blank()) + theme(aspect.ratio = 1) + labs(title = "", x = 'PlantW', y = "NNI") + theme(title = element_text(size = 15), text = element_text(size = 15)) + ylim(0, 1) 
+
+
 
 
 
